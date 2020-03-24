@@ -25,7 +25,7 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
 
-class Player(pygame.sprite.Sprite):
+class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((50, 40))
@@ -42,18 +42,19 @@ class Player(pygame.sprite.Sprite):
         self.speedy = 0
         press = pygame.key.get_pressed()
         if press[pygame.K_a]:
-            self.speedx = -8
+            self.speedx = -6
         if press[pygame.K_d]:
-            self.speedx = 8
+            self.speedx = 6
         if press[pygame.K_w]:
-            self.speedy = -8
+            self.speedy = -6
         if press[pygame.K_s]:
-            self.speedy = 8
+            self.speedy = 6
 
-        # ускорение
+        # Acceleration
         self.rect.x += self.speedx
         self.rect.y += self.speedy
-        # Границы
+
+        # Borders
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
         if self.rect.left < 0:
@@ -89,19 +90,17 @@ class EnemyShip(pygame.sprite.Sprite):
         self.last_shot = pygame.time.get_ticks()
         self.num_of_shots = 1
 
-        # Kamikaze
-        # self.speedy = 30
-
     def update(self):
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 15 or self.rect.left < -20 or self.rect.right > WIDTH + 20:
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
-            self.speedy = random.randrange(2, 7)
+
         # Shoot
         for shoot in range(self.num_of_shots):
             self.shoot()
+
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
 
     def shoot(self):
         current_time = pygame.time.get_ticks()
@@ -154,7 +153,7 @@ enemy_bullets = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 # mobs = pygame.sprite.Group()
 enemy_ships = pygame.sprite.Group()
-player = Player()
+player = PlayerShip()
 all_sprites.add(player)
 for i in range(5):
     enemy = EnemyShip(enemy_img, enemy_bullet_img, all_sprites, enemy_bullets)

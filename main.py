@@ -18,10 +18,12 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("S.Space")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-enemy_img = pygame.image.load('Textures/Enemy/enemy.png').convert_alpha()
 enemy_bullet_img = pygame.image.load('Textures/Enemy/laser.png').convert()
 player_bullet_img = pygame.image.load('Textures/Player/laser.png').convert()
+player_image = path.join(path.dirname(__file__), 'Textures/Player')
 asteroid_img = path.join(path.dirname(__file__), 'Textures/Asteroids')
+explosion_img = path.join(path.dirname(__file__), 'Textures/Explosions')
+enemy_img = path.join(path.dirname(__file__), 'Textures/Enemy')
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -30,27 +32,52 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
-asteroid_images = []
-asteroid_list = [
-    'asteroid_1.png',
-    'asteroid_2.png',
-    'asteroid_3.png',
-    'asteroid_4.png'
-]
+player_logo = pygame.image.load(path.join(player_image, "live.png")).convert()
+player_mini_logo = pygame.transform.scale(player_logo, (25, 19))
+player_mini_logo.set_colorkey(BLACK)
 
-for image in asteroid_list:
-    asteroid_images.append(pygame.image.load(path.join(asteroid_img, image)).convert_alpha())
+images_of_enemies = []
+for enemy in range(1, 5):
+    filename = 'enemy_{}.png'.format(enemy)
+    image_of_enemy = pygame.image.load(path.join(enemy_img, filename)).convert()
+    image_of_enemy.set_colorkey(BLACK)
+    img_main = pygame.transform.scale(image_of_enemy, (60, 60))
+    images_of_enemies.append(img_main)
+
+images_of_asteroids = []
+for animation in range(1, 5):
+    filename = 'asteroid_{}.png'.format(animation)
+    image_of_asteroid = pygame.image.load(path.join(asteroid_img, filename)).convert()
+    image_of_asteroid.set_colorkey(BLACK)
+    img_small = pygame.transform.scale(image_of_asteroid, (32, 32))
+    images_of_asteroids.append(img_small)
+
+animation_of_explosion = {'large': [], 'small': [], 'player': []}
+for animation in range(1, 10):
+    filename = 'explosion_{}.png'.format(animation)
+    img = pygame.image.load(path.join(explosion_img, filename)).convert()
+    img.set_colorkey(BLACK)
+    img_large = pygame.transform.scale(img, (75, 75))
+    animation_of_explosion['large'].append(img_large)
+    img_small = pygame.transform.scale(img, (32, 32))
+    animation_of_explosion['small'].append(img_small)
+    filename = 'player_explosion_{}.png'.format(animation)
+    img = pygame.image.load(path.join(explosion_img, filename)).convert()
+    img.set_colorkey(BLACK)
+    animation_of_explosion['player'].append(img)
 
 
 class PlayerShip(pygame.sprite.Sprite):
-    def __init__(self):
+
+    def __init__(self, sprites_list):
         pygame.sprite.Sprite.__init__(self)
         # Initialize player attributes, coordinates
         self.radius = 30
-        self.image = pygame.image.load("Textures/Player/player.png")
+        self.image = pygame.image.load(path.join(player_image, "player.png")).convert()
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
+        self.sprites = sprites_list
 
         # Other attributes
         self.speedx = 0
@@ -58,6 +85,9 @@ class PlayerShip(pygame.sprite.Sprite):
         self.health = 100
         self.shoot_delay = 175
         self.last_shot = pygame.time.get_ticks()
+        self.lives = 3
+        self.hidden = False
+        self.hide_timer = pygame.time.get_ticks()
 
     def update(self):
         # Move 0 if no buttons are pressed
@@ -90,6 +120,11 @@ class PlayerShip(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
+        if self.hidden and pygame.time.get_ticks() - self.hide_timer > 1000:
+            self.hidden = False
+            self.rect.centerx = WIDTH / 2
+            self.rect.bottom = HEIGHT - 10
+
     # Auto-Fire
     def shoot(self):
         timer = pygame.time.get_ticks()
@@ -97,14 +132,23 @@ class PlayerShip(pygame.sprite.Sprite):
             self.last_shot = timer
             bullet = PlayerBullet(self.rect.centerx, self.rect.top)
             all_sprites.add(bullet)
-            bullets.add(bullet)
+            player_bullets.add(bullet)
+
+    def hide(self):
+        # временно скрыть игрока
+        self.hidden = True
+        self.hide_timer = pygame.time.get_ticks()
+        self.rect.center = (WIDTH / 2, HEIGHT + 200)
 
 
 class EnemyShip(pygame.sprite.Sprite):
+
     def __init__(self, enemy_image, bullet_image, sprites_list, bullet_list):
         pygame.sprite.Sprite.__init__(self)
         # Sprites
-        self.image = pygame.transform.scale(enemy_image, (60, 60))
+        self.image_original = random.choice(enemy_image)
+        self.image = self.image_original.copy()
+        self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
         self.sprites = sprites_list
 
@@ -120,6 +164,14 @@ class EnemyShip(pygame.sprite.Sprite):
         self.last_shot = pygame.time.get_ticks()
         self.num_of_shots = 1
 
+    def shoot(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_shot > self.shoot_delay:
+            self.last_shot = current_time
+            bullet = EnemyBullet(self.bullet_image, self.rect.centerx, self.rect.bottom)
+            self.sprites.add(bullet)
+            self.bullets.add(bullet)
+
     def update(self):
         if self.rect.top > HEIGHT + 15 or self.rect.left < -20 or self.rect.right > WIDTH + 20:
             self.rect.x = random.randrange(50, WIDTH - 50)
@@ -129,14 +181,6 @@ class EnemyShip(pygame.sprite.Sprite):
         # Shoot
         for shoot in range(self.num_of_shots):
             self.shoot()
-
-    def shoot(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_shot > self.shoot_delay:
-            self.last_shot = current_time
-            bullet = EnemyBullet(self.bullet_image, self.rect.centerx, self.rect.bottom)
-            self.sprites.add(bullet)
-            self.bullets.add(bullet)
 
 
 class Asteroids(pygame.sprite.Sprite):
@@ -215,28 +259,69 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.kill()
 
 
+class Explosion(pygame.sprite.Sprite):
+
+    def __init__(self, center, size):
+        pygame.sprite.Sprite.__init__(self)
+        self.size = size
+        self.image = animation_of_explosion[self.size][0]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.frame = 0
+        self.last_update = pygame.time.get_ticks()
+        self.frame_rate = 50
+
+    def update(self):
+        timer = pygame.time.get_ticks()
+        if timer - self.last_update > self.frame_rate:
+            self.last_update = timer
+            self.frame += 1
+            if self.frame == len(animation_of_explosion[self.size]):
+                self.kill()
+            else:
+                center = self.rect.center
+                self.image = animation_of_explosion[self.size][self.frame]
+                self.rect = self.image.get_rect()
+                self.rect.center = center
+
+
+# Собираем все спрайты в группы для отрисовки
 all_sprites = pygame.sprite.Group()
-enemy_bullets = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
-asteroids = pygame.sprite.Group()
+
 enemy_ships = pygame.sprite.Group()
-player = PlayerShip()
-all_sprites.add(player)
+enemy_bullets = pygame.sprite.Group()
+player_ship = PlayerShip(player_image)
+player_bullets = pygame.sprite.Group()
+asteroids = pygame.sprite.Group()
+
+all_sprites.add(player_ship)
 
 
 def new_asteroid():
-    asteroid_enemy = Asteroids(asteroid_images)
+    asteroid_enemy = Asteroids(images_of_asteroids)
     all_sprites.add(asteroid_enemy)
     asteroids.add(asteroid_enemy)
+
+
+def new_enemy_ship():
+    enemy_ship = EnemyShip(images_of_enemies, enemy_bullet_img, all_sprites, enemy_bullets)
+    all_sprites.add(enemy_ship)
+    enemy_ships.add(enemy_ship)
+
+
+def draw_lives(surf, x, y, lives, image):
+    for live in range(lives):
+        image_rect = image.get_rect()
+        image_rect.x = x + 30 * live
+        image_rect.y = y
+        surf.blit(image, image_rect)
 
 
 for asteroid in range(5):
     new_asteroid()
 
 for enemy in range(4):
-    enemy = EnemyShip(enemy_img, enemy_bullet_img, all_sprites, enemy_bullets)
-    all_sprites.add(enemy)
-    enemy_ships.add(enemy)
+    new_enemy_ship()
 
 player_scores = 0
 
@@ -278,29 +363,51 @@ while running:
     all_sprites.update()
 
     # Удары по врагу
-    hits_player = pygame.sprite.groupcollide(enemy_ships, bullets, True, True)
+    hits_player = pygame.sprite.groupcollide(enemy_ships, player_bullets, True, True)
     for hit_player in hits_player:
         player_scores += 10
-        e = EnemyShip(enemy_img, enemy_bullet_img, all_sprites, enemy_bullets)
-        all_sprites.add(e)
-        enemy_ships.add(e)
+        explosion = Explosion(hit_player.rect.center, 'large')
+        all_sprites.add(explosion)
+        new_enemy_ship()
 
-    # Проверка, не ударил ли моб игрока
-    # hits_asteroids = pygame.sprite.spritecollide(player, asteroids, True, pygame.sprite.collide_circle)
-    # for hit_asteroids in hits_asteroids:
-    #     player.health -= hit_asteroids.radius
-    #     new_asteroid()
-    #     if player.health <= 0:
-    #         running = False
+    # Удары по астероидам
+    hits_player = pygame.sprite.groupcollide(asteroids, player_bullets, True, True)
+    for hit_player in hits_player:
+        player_scores += 5
+        explosion = Explosion(hit_player.rect.center, 'small')
+        all_sprites.add(explosion)
+        new_asteroid()
 
-    hits_asteroids = pygame.sprite.groupcollide(enemy_ships, asteroids, False, pygame.sprite.collide_circle)
-    for hit_asteroids in hits_asteroids:
-        running = True
+    # Удар астероида по игроку
+    hits = pygame.sprite.spritecollide(player_ship, asteroids, True, pygame.sprite.collide_circle)
+    for hit in hits:
+        player_ship.health -= hit.radius
+        explosion = Explosion(hit.rect.center, 'small')
+        all_sprites.add(explosion)
+        new_asteroid()
+        if player_ship.health <= 0:
+            player_explosion = Explosion(player_ship.rect.center, 'player')
+            all_sprites.add(player_explosion)
+            player_ship.hide()
+            player_ship.lives -= 1
+            player_ship.health = 100
+
+        if player_ship.lives == 0:
+            running = False
+
+    # Удары по врагу астероидами
+    hits_asteroids = pygame.sprite.groupcollide(enemy_ships, asteroids, True, True)
+    for hit_asteroid in hits_asteroids:
+        explosion = Explosion(hit_asteroid.rect.center, 'large')
+        all_sprites.add(explosion)
+        new_asteroid()
+        new_enemy_ship()
 
     screen.fill(BLACK)
     all_sprites.draw(screen)
     draw_player_scores(screen, str(player_scores), 25, WIDTH / 2, 20)
-    draw_health_bar(screen, 5, 5, player.health)
+    draw_health_bar(screen, 5, 5, player_ship.health)
+    draw_lives(screen, WIDTH - 100, 5, player_ship.lives, player_mini_logo)
     # screen.blit(backgroundImage, (0, 0))
     pygame.display.flip()
 

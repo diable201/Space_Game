@@ -45,19 +45,25 @@ for image in asteroid_list:
 class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        # Initialize player attributes, coordinates
         self.radius = 30
         self.image = pygame.image.load("Textures/Player/player.png")
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
+
+        # Other attributes
         self.speedx = 0
         self.speedy = 0
         self.health = 100
+        self.shoot_delay = 175
+        self.last_shot = pygame.time.get_ticks()
 
     def update(self):
-        # движение 0, если не нажаты кнопки, код проще, фпс больше
+        # Move 0 if no buttons are pressed
         self.speedx = 0
         self.speedy = 0
+        # Settings for keyboard
         press = pygame.key.get_pressed()
         if press[pygame.K_a]:
             self.speedx = -6
@@ -67,6 +73,8 @@ class PlayerShip(pygame.sprite.Sprite):
             self.speedy = -6
         if press[pygame.K_s]:
             self.speedy = 6
+        if press[pygame.K_SPACE]:
+            self.shoot()
 
         # Acceleration
         self.rect.x += self.speedx
@@ -82,10 +90,14 @@ class PlayerShip(pygame.sprite.Sprite):
         if self.rect.top < 0:
             self.rect.top = 0
 
+    # Auto-Fire
     def shoot(self):
-        bullet = PlayerBullet(self.rect.centerx, self.rect.top)
-        all_sprites.add(bullet)
-        bullets.add(bullet)
+        timer = pygame.time.get_ticks()
+        if timer - self.last_shot > self.shoot_delay:
+            self.last_shot = timer
+            bullet = PlayerBullet(self.rect.centerx, self.rect.top)
+            all_sprites.add(bullet)
+            bullets.add(bullet)
 
 
 class EnemyShip(pygame.sprite.Sprite):
@@ -260,11 +272,8 @@ while running:
         # проверка для закрытия окна
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
-            if pressed[pygame.K_ESCAPE]:
-                running = False
-            if pressed[pygame.K_SPACE]:
-                player.shoot()
+        if pressed[pygame.K_ESCAPE]:
+            running = False
 
     all_sprites.update()
 

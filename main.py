@@ -17,7 +17,7 @@ pygame.mixer.music.set_volume(10)
 clock = pygame.time.Clock()
 pygame.display.set_caption("S.Space")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-img_dir = path.join(path.dirname(__file__), 'Textures')
+
 enemy_img = pygame.image.load('Textures/Enemy/enemy.png').convert_alpha()
 enemy_bullet_img = pygame.image.load('Textures/Enemy/laser.png').convert()
 player_bullet_img = pygame.image.load('Textures/Player/laser.png').convert()
@@ -29,6 +29,17 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
+
+asteroid_images = []
+asteroid_list = [
+    'asteroid_1.png',
+    'asteroid_2.png',
+    'asteroid_3.png',
+    'asteroid_4.png'
+]
+
+for image in asteroid_list:
+    asteroid_images.append(pygame.image.load(path.join(asteroid_img, image)).convert_alpha())
 
 
 class PlayerShip(pygame.sprite.Sprite):
@@ -83,6 +94,7 @@ class EnemyShip(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(enemy_image, (60, 60))
         self.rect = self.image.get_rect()
         self.sprites = sprites_list
+
         # Start position
         self.rect.x = random.randint(20, WIDTH - 20)
         self.rect.y = random.randrange(-140, -30)
@@ -116,15 +128,31 @@ class EnemyShip(pygame.sprite.Sprite):
 
 class Asteroids(pygame.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self, asteroid_image):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("Textures/Asteroids/asteroid_5.png")
+        self.image_original = random.choice(asteroid_image)
+        self.image = self.image_original.copy()
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width / 2)
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
         self.speedy = random.randrange(1, 4)
         self.speedx = random.randrange(-3, 2)
+        self.rot = 0
+        self.rot_speed = random.randrange(-5, 5)
+        self.last_update = pygame.time.get_ticks()
+
+    def rotate(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > 50:
+            self.last_update = now
+            self.rot = (self.rot + self.rot_speed) % 360
+            self.image = pygame.transform.rotate(self.image_original, self.rot)
+            new_image = pygame.transform.rotate(self.image_original, self.rot)
+            old_center = self.rect.center
+            self.image = new_image
+            self.rect = self.image.get_rect()
+            self.rect.center = old_center
 
     def update(self):
         self.rect.x += self.speedx
@@ -133,6 +161,7 @@ class Asteroids(pygame.sprite.Sprite):
             self.rect.x = random.randrange(WIDTH - self.rect.width)
             self.rect.y = random.randrange(-100, -40)
             self.speedy = random.randrange(1, 4)
+        self.rotate()
 
 
 class PlayerBullet(pygame.sprite.Sprite):
@@ -176,15 +205,16 @@ all_sprites = pygame.sprite.Group()
 enemy_bullets = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 asteroids = pygame.sprite.Group()
-# mobs = pygame.sprite.Group()
 enemy_ships = pygame.sprite.Group()
 player = PlayerShip()
 all_sprites.add(player)
-for i in range(8):
-    asteroid = Asteroids()
+
+for asteroid in range(5):
+    asteroid = Asteroids(asteroid_images)
     all_sprites.add(asteroid)
     asteroids.add(asteroid)
-for i in range(5):
+
+for enemy in range(4):
     enemy = EnemyShip(enemy_img, enemy_bullet_img, all_sprites, enemy_bullets)
     all_sprites.add(enemy)
     enemy_ships.add(enemy)

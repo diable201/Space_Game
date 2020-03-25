@@ -9,6 +9,11 @@ WIDTH = 800
 HEIGHT = 600
 FPS = 60
 pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.load('music.ogg')
+pygame.mixer.music.play()
+pygame.mixer.music.set_volume(10)
+
 clock = pygame.time.Clock()
 pygame.display.set_caption("S.Space")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -16,6 +21,7 @@ img_dir = path.join(path.dirname(__file__), 'Textures')
 enemy_img = pygame.image.load('Textures/Enemy/enemy.png').convert_alpha()
 enemy_bullet_img = pygame.image.load('Textures/Enemy/laser.png').convert()
 player_bullet_img = pygame.image.load('Textures/Player/laser.png').convert()
+asteroid_img = path.join(path.dirname(__file__), 'Textures/Asteroids')
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -28,7 +34,7 @@ YELLOW = (255, 255, 0)
 class PlayerShip(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((50, 40))
+        self.radius = 30
         self.image = pygame.image.load("Textures/Player/player.png")
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
@@ -80,27 +86,24 @@ class EnemyShip(pygame.sprite.Sprite):
         # Start position
         self.rect.x = random.randint(20, WIDTH - 20)
         self.rect.y = random.randrange(-140, -30)
-        self.speedy = random.randrange(2, 7)
-        self.speedx = random.randrange(-1, 1)
+        self.speedy = random.randrange(2, 6)
 
         # Bullet settings
         self.bullet_image = bullet_image
         self.bullets = bullet_list
-        self.shoot_delay = random.randint(1200, 1500)
+        self.shoot_delay = random.randint(1250, 1500)
         self.last_shot = pygame.time.get_ticks()
         self.num_of_shots = 1
 
     def update(self):
         if self.rect.top > HEIGHT + 15 or self.rect.left < -20 or self.rect.right > WIDTH + 20:
-            self.rect.x = random.randrange(WIDTH - self.rect.width)
-            self.rect.y = random.randrange(-100, -40)
+            self.rect.x = random.randrange(50, WIDTH - 50)
+            self.rect.y = random.randrange(-100, -50)
+        self.rect.y += self.speedy
 
         # Shoot
         for shoot in range(self.num_of_shots):
             self.shoot()
-
-        self.rect.x += self.speedx
-        self.rect.y += self.speedy
 
     def shoot(self):
         current_time = pygame.time.get_ticks()
@@ -109,6 +112,27 @@ class EnemyShip(pygame.sprite.Sprite):
             bullet = EnemyBullet(self.bullet_image, self.rect.centerx, self.rect.bottom)
             self.sprites.add(bullet)
             self.bullets.add(bullet)
+
+
+class Asteroids(pygame.sprite.Sprite):
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("Textures/Asteroids/asteroid_5.png")
+        self.rect = self.image.get_rect()
+        self.radius = int(self.rect.width / 2)
+        self.rect.x = random.randrange(WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-100, -40)
+        self.speedy = random.randrange(1, 4)
+        self.speedx = random.randrange(-3, 2)
+
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+        if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
+            self.rect.x = random.randrange(WIDTH - self.rect.width)
+            self.rect.y = random.randrange(-100, -40)
+            self.speedy = random.randrange(1, 4)
 
 
 class PlayerBullet(pygame.sprite.Sprite):
@@ -151,10 +175,15 @@ class EnemyBullet(pygame.sprite.Sprite):
 all_sprites = pygame.sprite.Group()
 enemy_bullets = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+asteroids = pygame.sprite.Group()
 # mobs = pygame.sprite.Group()
 enemy_ships = pygame.sprite.Group()
 player = PlayerShip()
 all_sprites.add(player)
+for i in range(8):
+    asteroid = Asteroids()
+    all_sprites.add(asteroid)
+    asteroids.add(asteroid)
 for i in range(5):
     enemy = EnemyShip(enemy_img, enemy_bullet_img, all_sprites, enemy_bullets)
     all_sprites.add(enemy)
@@ -186,7 +215,7 @@ while running:
         enemy_ships.add(e)
 
     # Проверка, не ударил ли моб игрока
-    # hits_mob = pygame.sprite.spritecollide(player, EnemyShip, False)
+    # hits_mob = pygame.sprite.spritecollide(player, asteroids, False, pygame.sprite.collide_circle)
     # if hits_mob:
     #     running = False
 

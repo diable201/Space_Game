@@ -52,6 +52,7 @@ class PlayerShip(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
         self.speedy = 0
+        self.health = 100
 
     def update(self):
         # движение 0, если не нажаты кнопки, код проще, фпс больше
@@ -172,11 +173,11 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.bottom = y
         self.rect.centerx = x
-        self.speedy = -10  # отрицательное для движения вверх
+        self.speedy = -10  # negative for movement up
 
     def update(self):
         self.rect.y += self.speedy
-        # убить, если он заходит за верхнюю часть экрана
+        # if bullet goes off bottom of window, destroy it
         if self.rect.bottom < 0:
             self.kill()
 
@@ -185,15 +186,16 @@ class EnemyBullet(pygame.sprite.Sprite):
 
     def __init__(self, bullet_image, x, y):
         pygame.sprite.Sprite.__init__(self)
+
         # scale bullet size
         self.image = pygame.transform.scale(bullet_image, (8, 23))
         self.rect = self.image.get_rect()
+
         # bullet position is according the player position
         self.rect.centerx = x
         self.rect.bottom = y
         self.speedy = 15
 
-    # update bullet
     def update(self):
         self.rect.y += self.speedy
         # if bullet goes off bottom of window, destroy it
@@ -209,15 +211,44 @@ enemy_ships = pygame.sprite.Group()
 player = PlayerShip()
 all_sprites.add(player)
 
+
+def new_asteroid():
+    asteroid_enemy = Asteroids(asteroid_images)
+    all_sprites.add(asteroid_enemy)
+    asteroids.add(asteroid_enemy)
+
+
 for asteroid in range(5):
-    asteroid = Asteroids(asteroid_images)
-    all_sprites.add(asteroid)
-    asteroids.add(asteroid)
+    new_asteroid()
 
 for enemy in range(4):
     enemy = EnemyShip(enemy_img, enemy_bullet_img, all_sprites, enemy_bullets)
     all_sprites.add(enemy)
     enemy_ships.add(enemy)
+
+player_scores = 0
+
+
+def draw_player_scores(surface, text, size, x, y):
+    font_name = pygame.font.match_font('arial')
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surface.blit(text_surface, text_rect)
+
+
+def draw_health_bar(surface, x, y, health):
+    if health < 0:
+        health = 0
+    BAR_LENGTH = 100
+    BAR_HEIGHT = 10
+    fill = (health / 100) * BAR_LENGTH
+    outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)  # white border
+    fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)  # health border
+    pygame.draw.rect(surface, GREEN, fill_rect)
+    pygame.draw.rect(surface, WHITE, outline_rect, 2)
+
 
 running = True
 while running:
@@ -240,17 +271,27 @@ while running:
     # Удары по врагу
     hits_player = pygame.sprite.groupcollide(enemy_ships, bullets, True, True)
     for hit_player in hits_player:
+        player_scores += 10
         e = EnemyShip(enemy_img, enemy_bullet_img, all_sprites, enemy_bullets)
         all_sprites.add(e)
         enemy_ships.add(e)
 
     # Проверка, не ударил ли моб игрока
-    # hits_mob = pygame.sprite.spritecollide(player, asteroids, False, pygame.sprite.collide_circle)
-    # if hits_mob:
-    #     running = False
+    # hits_asteroids = pygame.sprite.spritecollide(player, asteroids, True, pygame.sprite.collide_circle)
+    # for hit_asteroids in hits_asteroids:
+    #     player.health -= hit_asteroids.radius
+    #     new_asteroid()
+    #     if player.health <= 0:
+    #         running = False
+
+    hits_asteroids = pygame.sprite.groupcollide(enemy_ships, asteroids, False, pygame.sprite.collide_circle)
+    for hit_asteroids in hits_asteroids:
+        running = True
 
     screen.fill(BLACK)
     all_sprites.draw(screen)
+    draw_player_scores(screen, str(player_scores), 25, WIDTH / 2, 20)
+    draw_health_bar(screen, 5, 5, player.health)
     # screen.blit(backgroundImage, (0, 0))
     pygame.display.flip()
 

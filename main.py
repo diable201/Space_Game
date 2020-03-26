@@ -14,12 +14,15 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("S.Space")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
+
 enemy_bullet_img = pygame.image.load('Textures/Enemy/laser.png').convert()
 player_bullet_img = pygame.image.load('Textures/Player/laser.png').convert()
 player_image = path.join(path.dirname(__file__), 'Textures/Player')
 asteroid_img = path.join(path.dirname(__file__), 'Textures/Asteroids')
 explosion_img = path.join(path.dirname(__file__), 'Textures/Explosions')
+background_img = path.join(path.dirname(__file__), 'Textures/Background')
 enemy_img = path.join(path.dirname(__file__), 'Textures/Enemy')
+
 
 sound_dir = path.join(path.dirname(__file__), 'Sound')
 
@@ -45,6 +48,8 @@ YELLOW = (255, 255, 0)
 player_logo = pygame.image.load(path.join(player_image, "live.png")).convert()
 player_mini_logo = pygame.transform.scale(player_logo, (25, 19))
 player_mini_logo.set_colorkey(BLACK)
+background = pygame.image.load(path.join(background_img, "back.png")).convert()
+background_rect = background.get_rect()
 
 images_of_enemies = []
 for enemy in range(1, 21):
@@ -334,6 +339,31 @@ player_ship = PlayerShip()
 all_sprites.add(player_ship)
 
 
+def render(surface, text, size, x, y):
+    font_name = pygame.font.match_font('arial')
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surface.blit(text_surface, text_rect)
+
+
+def start_menu():
+    screen.blit(background, background_rect)
+    render(screen, "S.Space", 64, WIDTH / 2, HEIGHT / 4)
+    render(screen, "Arrow keys move, Space to fire", 22, WIDTH / 2, HEIGHT / 2)
+    render(screen, "Press a key to begin", 18, WIDTH / 2, HEIGHT * 3 / 4)
+    pygame.display.flip()
+    menu = True
+    while menu:
+        clock.tick(FPS)
+        for key in pygame.event.get():
+            if key.type == pygame.QUIT:
+                pygame.quit()
+            if key.type == pygame.KEYUP:
+                menu = False
+
+
 def new_asteroid():
     asteroid_enemy = Asteroids(images_of_asteroids)
     all_sprites.add(asteroid_enemy)
@@ -363,15 +393,6 @@ for enemy in range(4):
 player_scores = 0
 
 
-def draw_player_scores(surface, text, size, x, y):
-    font_name = pygame.font.match_font('arial')
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, WHITE)
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-    surface.blit(text_surface, text_rect)
-
-
 def draw_health_bar(surface, x, y, health):
     if health < 0:
         health = 0
@@ -384,11 +405,33 @@ def draw_health_bar(surface, x, y, health):
     pygame.draw.rect(surface, WHITE, outline_rect, 2)
 
 
+Game_Over = True
 running = True
 while running:
     # Держим цикл на правильной скорости
     clock.tick(FPS)
     # Ввод процесса (события)
+    if Game_Over:
+        start_menu()
+        Game_Over = False
+        all_sprites = pygame.sprite.Group()
+        enemy_ships = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
+        player_bullets = pygame.sprite.Group()
+        asteroids = pygame.sprite.Group()
+        firs_ait_kit = pygame.sprite.Group()
+        player_ship = PlayerShip()
+
+        all_sprites.add(player_ship)
+
+        for asteroid in range(5):
+            new_asteroid()
+
+        for enemy in range(4):
+            new_enemy_ship()
+
+        player_scores = 0
+
     for event in pygame.event.get():
         pressed = pygame.key.get_pressed()
         # проверка для закрытия окна
@@ -462,7 +505,7 @@ while running:
 
     screen.fill(BLACK)
     all_sprites.draw(screen)
-    draw_player_scores(screen, str(player_scores), 25, WIDTH / 2, 20)
+    render(screen, str(player_scores), 25, WIDTH / 2, 20)
     draw_health_bar(screen, 5, 5, player_ship.health)
     draw_lives(screen, WIDTH - 100, 5, player_ship.lives, player_mini_logo)
     # screen.blit(backgroundImage, (0, 0))

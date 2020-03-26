@@ -8,12 +8,8 @@ from os import path
 WIDTH = 800
 HEIGHT = 600
 FPS = 60
-pygame.init()
-pygame.mixer.init()
-pygame.mixer.music.load('music.ogg')
-pygame.mixer.music.play()
-pygame.mixer.music.set_volume(10)
 
+pygame.init()
 clock = pygame.time.Clock()
 pygame.display.set_caption("S.Space")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -24,6 +20,19 @@ player_image = path.join(path.dirname(__file__), 'Textures/Player')
 asteroid_img = path.join(path.dirname(__file__), 'Textures/Asteroids')
 explosion_img = path.join(path.dirname(__file__), 'Textures/Explosions')
 enemy_img = path.join(path.dirname(__file__), 'Textures/Enemy')
+
+sound_dir = path.join(path.dirname(__file__), 'Sound')
+
+pygame.mixer.init()
+pygame.mixer.music.load(path.join(sound_dir, 'ost.ogg'))
+pygame.mixer.music.play(-1)  # for loop
+pygame.mixer.music.set_volume(10)
+
+# Sounds for game play
+shoot_sound_player = pygame.mixer.Sound(path.join(sound_dir, 'shoot_player.ogg'))
+shoot_sound_enemy = pygame.mixer.Sound(path.join(sound_dir, 'shoot_enemy.ogg'))
+explosion_sound_asteroid = pygame.mixer.Sound(path.join(sound_dir, 'explosion_asteroid.ogg'))
+explosion_sound_ship = pygame.mixer.Sound(path.join(sound_dir, 'explosion_ship.ogg'))
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -133,6 +142,7 @@ class PlayerShip(pygame.sprite.Sprite):
             bullet = PlayerBullet(self.rect.centerx, self.rect.top)
             all_sprites.add(bullet)
             player_bullets.add(bullet)
+            shoot_sound_player.play()
 
     def hide(self):
         # временно скрыть игрока
@@ -171,6 +181,7 @@ class EnemyShip(pygame.sprite.Sprite):
             bullet = EnemyBullet(self.bullet_image, self.rect.centerx, self.rect.bottom)
             self.sprites.add(bullet)
             self.bullets.add(bullet)
+            shoot_sound_enemy.play()
 
     def update(self):
         if self.rect.top > HEIGHT + 15 or self.rect.left < -20 or self.rect.right > WIDTH + 20:
@@ -385,6 +396,7 @@ while running:
     for hit_player in hits_player:
         player_scores += 10
         explosion = Explosion(hit_player.rect.center, 'large')
+        explosion_sound_ship.play()
         all_sprites.add(explosion)
         # появление щита с вероятностью 15 %
         if random.random() > 0.85:
@@ -399,6 +411,7 @@ while running:
         player_scores += 5
         explosion = Explosion(hit_player.rect.center, 'small')
         all_sprites.add(explosion)
+        explosion_sound_asteroid.play()
         new_asteroid()
 
     # Удар астероида по игроку
@@ -407,10 +420,12 @@ while running:
         player_ship.health -= hit.radius
         explosion = Explosion(hit.rect.center, 'small')
         all_sprites.add(explosion)
+        explosion_sound_asteroid.play()
         new_asteroid()
         if player_ship.health <= 0:
             player_explosion = Explosion(player_ship.rect.center, 'player')
             all_sprites.add(player_explosion)
+            explosion_sound_ship.play()
             player_ship.hide()
             player_ship.lives -= 1
             player_ship.health = 100
@@ -423,15 +438,18 @@ while running:
     for hit_asteroid in hits_asteroids:
         explosion = Explosion(hit_asteroid.rect.center, 'large')
         all_sprites.add(explosion)
+        explosion_sound_ship.play()
         new_asteroid()
         new_enemy_ship()
 
-    # Столконвение хилки с игроком
+    # Столкновение хилки с игроком
     hits_first_aid_kit = pygame.sprite.spritecollide(player_ship, firs_ait_kit, True)
     for hit_first_aid_kit in hits_first_aid_kit:
         player_ship.health += random.randrange(15, 25)
         if player_ship.health >= 100:
             player_ship.health = 100
+
+    # TODO Create collision with enemy ship
 
     screen.fill(BLACK)
     all_sprites.draw(screen)

@@ -33,6 +33,7 @@ shoot_sound_player = pygame.mixer.Sound(path.join(sound_dir, 'shoot_player.ogg')
 shoot_sound_enemy = pygame.mixer.Sound(path.join(sound_dir, 'shoot_enemy.ogg'))
 explosion_sound_asteroid = pygame.mixer.Sound(path.join(sound_dir, 'explosion_asteroid.ogg'))
 explosion_sound_ship = pygame.mixer.Sound(path.join(sound_dir, 'explosion_ship.ogg'))
+health_sound_player = pygame.mixer.Sound(path.join(sound_dir, 'health.ogg'))
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -46,12 +47,20 @@ player_mini_logo = pygame.transform.scale(player_logo, (25, 19))
 player_mini_logo.set_colorkey(BLACK)
 
 images_of_enemies = []
-for enemy in range(1, 5):
+for enemy in range(1, 21):
     filename = 'enemy_{}.png'.format(enemy)
     image_of_enemy = pygame.image.load(path.join(enemy_img, filename)).convert()
     image_of_enemy.set_colorkey(BLACK)
     img_main = pygame.transform.scale(image_of_enemy, (60, 60))
     images_of_enemies.append(img_main)
+
+images_of_player = []
+for player in range(1, 12):
+    filename = 'player_{}.png'.format(player)
+    image_of_player = pygame.image.load(path.join(player_image, filename)).convert()
+    image_of_player.set_colorkey(BLACK)
+    img_main = pygame.transform.scale(image_of_player, (60, 60))
+    images_of_player.append(img_main)
 
 images_of_asteroids = []
 for animation in range(1, 5):
@@ -82,11 +91,10 @@ class PlayerShip(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         # Initialize player attributes, coordinates
         self.radius = 30
-        self.image = pygame.image.load(path.join(player_image, "player.png")).convert()
+        self.image = random.choice(images_of_player)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
-        # self.sprites = sprites_list
 
         # Other attributes
         self.speedx = 0
@@ -445,6 +453,7 @@ while running:
     # Столкновение хилки с игроком
     hits_first_aid_kit = pygame.sprite.spritecollide(player_ship, firs_ait_kit, True)
     for hit_first_aid_kit in hits_first_aid_kit:
+        health_sound_player.play()
         player_ship.health += random.randrange(15, 25)
         if player_ship.health >= 100:
             player_ship.health = 100

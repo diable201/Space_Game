@@ -69,7 +69,7 @@ for animation in range(1, 10):
 
 class PlayerShip(pygame.sprite.Sprite):
 
-    def __init__(self, sprites_list):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         # Initialize player attributes, coordinates
         self.radius = 30
@@ -77,7 +77,7 @@ class PlayerShip(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
-        self.sprites = sprites_list
+        # self.sprites = sprites_list
 
         # Other attributes
         self.speedx = 0
@@ -285,14 +285,32 @@ class Explosion(pygame.sprite.Sprite):
                 self.rect.center = center
 
 
+class FirstAidKit(pygame.sprite.Sprite):
+
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load(path.join(player_image, "first_aid_kit.png")).convert()
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.speedy = 4
+
+    def update(self):
+        self.rect.y += self.speedy
+        # если выйдет за границы -> убить
+        if self.rect.top > HEIGHT:
+            self.kill()
+
+
 # Собираем все спрайты в группы для отрисовки
 all_sprites = pygame.sprite.Group()
 
 enemy_ships = pygame.sprite.Group()
 enemy_bullets = pygame.sprite.Group()
-player_ship = PlayerShip(player_image)
 player_bullets = pygame.sprite.Group()
 asteroids = pygame.sprite.Group()
+firs_ait_kit = pygame.sprite.Group()
+player_ship = PlayerShip()
 
 all_sprites.add(player_ship)
 
@@ -368,6 +386,11 @@ while running:
         player_scores += 10
         explosion = Explosion(hit_player.rect.center, 'large')
         all_sprites.add(explosion)
+        # появление щита с вероятностью 15 %
+        if random.random() > 0.85:
+            health_boost = FirstAidKit(hit_player.rect.center)
+            all_sprites.add(health_boost)
+            firs_ait_kit.add(health_boost)
         new_enemy_ship()
 
     # Удары по астероидам
@@ -402,6 +425,13 @@ while running:
         all_sprites.add(explosion)
         new_asteroid()
         new_enemy_ship()
+
+    # Столконвение хилки с игроком
+    hits_first_aid_kit = pygame.sprite.spritecollide(player_ship, firs_ait_kit, True)
+    for hit_first_aid_kit in hits_first_aid_kit:
+        player_ship.health += random.randrange(15, 25)
+        if player_ship.health >= 100:
+            player_ship.health = 100
 
     screen.fill(BLACK)
     all_sprites.draw(screen)

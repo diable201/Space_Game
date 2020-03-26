@@ -46,7 +46,7 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
 player_logo = pygame.image.load(path.join(player_image, "live.png")).convert()
-player_mini_logo = pygame.transform.scale(player_logo, (25, 19))
+player_mini_logo = pygame.transform.scale(player_logo, (25, 30))
 player_mini_logo.set_colorkey(BLACK)
 background = pygame.image.load(path.join(background_img, "back.png")).convert()
 background_rect = background.get_rect()
@@ -327,15 +327,14 @@ class FirstAidKit(pygame.sprite.Sprite):
 
 
 # Собираем все спрайты в группы для отрисовки
-all_sprites = pygame.sprite.Group()
 
+all_sprites = pygame.sprite.Group()
 enemy_ships = pygame.sprite.Group()
 enemy_bullets = pygame.sprite.Group()
 player_bullets = pygame.sprite.Group()
 asteroids = pygame.sprite.Group()
 firs_ait_kit = pygame.sprite.Group()
 player_ship = PlayerShip()
-
 all_sprites.add(player_ship)
 
 
@@ -346,22 +345,6 @@ def render(surface, text, size, x, y):
     text_rect = text_surface.get_rect()
     text_rect.midtop = (x, y)
     surface.blit(text_surface, text_rect)
-
-
-def start_menu():
-    screen.blit(background, background_rect)
-    render(screen, "S.Space", 64, WIDTH / 2, HEIGHT / 4)
-    render(screen, "Arrow keys move, Space to fire", 22, WIDTH / 2, HEIGHT / 2)
-    render(screen, "Press a key to begin", 18, WIDTH / 2, HEIGHT * 3 / 4)
-    pygame.display.flip()
-    menu = True
-    while menu:
-        clock.tick(FPS)
-        for key in pygame.event.get():
-            if key.type == pygame.QUIT:
-                pygame.quit()
-            if key.type == pygame.KEYUP:
-                menu = False
 
 
 def new_asteroid():
@@ -384,20 +367,18 @@ def draw_lives(surf, x, y, lives, image):
         surf.blit(image, image_rect)
 
 
-for asteroid in range(5):
-    new_asteroid()
-
-for enemy in range(4):
-    new_enemy_ship()
-
-player_scores = 0
+def create_mob():
+    for asteroid in range(5):
+        new_asteroid()
+    for enemy_ship in range(4):
+        new_enemy_ship()
 
 
 def draw_health_bar(surface, x, y, health):
-    if health < 0:
+    if health <= 0:
         health = 0
-    BAR_LENGTH = 100
-    BAR_HEIGHT = 10
+    BAR_LENGTH = 200
+    BAR_HEIGHT = 20
     fill = (health / 100) * BAR_LENGTH
     outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)  # white border
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)  # health border
@@ -405,14 +386,64 @@ def draw_health_bar(surface, x, y, health):
     pygame.draw.rect(surface, WHITE, outline_rect, 2)
 
 
-Game_Over = True
-running = True
-while running:
+def start_menu():
+    screen.blit(background, background_rect)
+    render(screen, "S.Space", 64, WIDTH / 2, HEIGHT / 4)
+    render(screen, "Arrow keys move, Space to fire", 22, WIDTH / 2, HEIGHT / 2)
+    render(screen, "Press a key to begin", 22, WIDTH / 2, HEIGHT * 3 / 4)
+    pygame.display.flip()
+    menu = True
+    while menu:
+        clock.tick(FPS)
+        for key in pygame.event.get():
+            if key.type == pygame.QUIT:
+                pygame.quit()
+            if key.type == pygame.KEYUP:
+                menu = False
+
+
+def end_menu():
+    screen.blit(background, background_rect)
+    render(screen, "Game Over", 64, WIDTH / 2, HEIGHT / 4)
+    render(screen, "Press any key to begin again", 22, WIDTH / 2, HEIGHT / 2)
+    render(screen, "Or close the window to end", 22, WIDTH / 2, HEIGHT * 3 / 4)
+    pygame.display.flip()
+    end = True
+    while end:
+        clock.tick(FPS)
+        for key in pygame.event.get():
+            if key.type == pygame.QUIT:
+                pygame.quit()
+            if key.type == pygame.KEYUP:
+                end = False
+
+
+player_scores = 0
+Game_Over = False
+start = True
+game = True
+
+while game:
     # Держим цикл на правильной скорости
     clock.tick(FPS)
     # Ввод процесса (события)
-    if Game_Over:
+    if start:
         start_menu()
+        start = False
+
+        all_sprites = pygame.sprite.Group()
+        enemy_ships = pygame.sprite.Group()
+        enemy_bullets = pygame.sprite.Group()
+        player_bullets = pygame.sprite.Group()
+        asteroids = pygame.sprite.Group()
+        firs_ait_kit = pygame.sprite.Group()
+        player_ship = PlayerShip()
+        all_sprites.add(player_ship)
+        create_mob()
+        player_scores = 0
+
+    if Game_Over:
+        end_menu()
         Game_Over = False
         all_sprites = pygame.sprite.Group()
         enemy_ships = pygame.sprite.Group()
@@ -421,24 +452,17 @@ while running:
         asteroids = pygame.sprite.Group()
         firs_ait_kit = pygame.sprite.Group()
         player_ship = PlayerShip()
-
         all_sprites.add(player_ship)
-
-        for asteroid in range(5):
-            new_asteroid()
-
-        for enemy in range(4):
-            new_enemy_ship()
-
+        create_mob()
         player_scores = 0
 
     for event in pygame.event.get():
         pressed = pygame.key.get_pressed()
         # проверка для закрытия окна
         if event.type == pygame.QUIT:
-            running = False
+            game = False
         if pressed[pygame.K_ESCAPE]:
-            running = False
+            game = False
 
     all_sprites.update()
 
@@ -482,7 +506,7 @@ while running:
             player_ship.health = 100
 
         if player_ship.lives == 0:
-            running = False
+            Game_Over = True
 
     # Удары по врагу астероидами
     hits_asteroids = pygame.sprite.groupcollide(enemy_ships, asteroids, True, True)
@@ -504,11 +528,11 @@ while running:
     # TODO Create collision with enemy ship
 
     screen.fill(BLACK)
+    screen.blit(background, background_rect)
     all_sprites.draw(screen)
     render(screen, str(player_scores), 25, WIDTH / 2, 20)
     draw_health_bar(screen, 5, 5, player_ship.health)
     draw_lives(screen, WIDTH - 100, 5, player_ship.lives, player_mini_logo)
-    # screen.blit(backgroundImage, (0, 0))
     pygame.display.flip()
 
 pygame.quit()

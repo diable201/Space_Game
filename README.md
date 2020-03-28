@@ -1,7 +1,7 @@
 # ℹ️ Space Game
 The space shooter using Python 3 and Library Pygame.
 
-![Screen_1](Screenshots/screenshot_1.png)
+|![Screen_1](Screenshots/screenshot_1.png)|
 
 ## :o: INDEX
 * [Requirements](https://github.com/diable201/Space_Game#%EF%B8%8F-requirements)

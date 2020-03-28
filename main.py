@@ -12,6 +12,7 @@ FPS = 60
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 
 # Initialize the game
 pygame.init()
@@ -87,9 +88,9 @@ for animation in range(1, 10):
     img_small = pygame.transform.scale(img, (32, 32))
     animation_of_explosion['small'].append(img_small)
     filename = 'player_explosion_{}.png'.format(animation)
-    img = pygame.image.load(path.join(explosion_dir, filename)).convert()
-    img.set_colorkey(BLACK)
-    animation_of_explosion['player'].append(img)
+    img_player = pygame.image.load(path.join(explosion_dir, filename)).convert()
+    img_player.set_colorkey(BLACK)
+    animation_of_explosion['player'].append(img_player)
 
 
 # Main classes for game
@@ -108,7 +109,7 @@ class PlayerShip(pygame.sprite.Sprite):
         self.speedx = 0
         self.speedy = 0
         self.health = 100
-        self.shoot_delay = 175
+        self.shoot_delay = 165
         self.last_shot = pygame.time.get_ticks()
         self.lives = 3
         self.hidden = False
@@ -146,7 +147,7 @@ class PlayerShip(pygame.sprite.Sprite):
             self.rect.top = 0
 
         # Show player after death
-        if self.hidden and pygame.time.get_ticks() - self.hide_timer > 500:
+        if self.hidden and pygame.time.get_ticks() - self.hide_timer > 400:
             self.hidden = False
             self.rect.centerx = WIDTH / 2
             self.rect.bottom = HEIGHT - 10
@@ -182,7 +183,7 @@ class EnemyShip(pygame.sprite.Sprite):
         # Start position
         self.rect.x = random.randint(20, WIDTH - 20)
         self.rect.y = random.randrange(-140, -30)
-        self.speedy = random.randrange(2, 6)
+        self.speedy = random.randrange(2, 7)
 
         # Bullet settings
         self.bullet_image = bullet_image
@@ -355,7 +356,7 @@ all_sprites.add(player_ship)
 
 # Render text in the window
 def render(surface, text, size, x, y):
-    font_name = pygame.font.match_font('arial')
+    font_name = pygame.font.match_font('Arial')
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, WHITE)
     text_rect = text_surface.get_rect()
@@ -388,9 +389,9 @@ def draw_lives(surf, x, y, lives, image):
 
 # Initial values for a new game
 def create_object():
-    for asteroid in range(5):
+    for asteroid in range(6):
         new_asteroid()
-    for enemy_ship in range(3):
+    for enemy_ship in range(4):
         new_enemy_ship()
 
 
@@ -403,16 +404,23 @@ def draw_health_bar(surface, x, y, health):
     fill = (health / 100) * BAR_LENGTH
     outline_rect = pygame.Rect(x, y, BAR_LENGTH, BAR_HEIGHT)  # white border
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)  # health border
-    pygame.draw.rect(surface, GREEN, fill_rect)
-    pygame.draw.rect(surface, WHITE, outline_rect, 2)
+    # Full health
+    if health >= 30:
+        pygame.draw.rect(surface, GREEN, fill_rect)
+        pygame.draw.rect(surface, WHITE, outline_rect, 2)
+    # Low health
+    else:
+        pygame.draw.rect(surface, RED, fill_rect)
+        pygame.draw.rect(surface, WHITE, outline_rect, 2)
+
 
 
 # Start menu for a new game
 def start_menu():
     screen.blit(background, background_rect)
-    render(screen, "S.Space", 64, WIDTH / 2, HEIGHT / 4)
-    render(screen, "Arrow WADS move, Space to fire", 22, WIDTH / 2, HEIGHT / 2)
-    render(screen, "Press a key to begin", 22, WIDTH / 2, HEIGHT * 3 / 4)
+    render(screen, "Welcome to S.Space", 64, WIDTH / 2, HEIGHT / 4)
+    render(screen, "Arrow WADS to move. Hold or press Space to fire", 22, WIDTH / 2, HEIGHT / 2)
+    render(screen, "Press any key to begin", 22, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.flip()
     menu = True
     while menu:
@@ -428,17 +436,20 @@ def start_menu():
 def end_menu():
     screen.blit(background, background_rect)
     render(screen, "Game Over", 64, WIDTH / 2, HEIGHT / 4)
-    render(screen, "Press any key to begin again", 22, WIDTH / 2, HEIGHT / 2)
-    render(screen, "Or close the window to end", 22, WIDTH / 2, HEIGHT * 3 / 4)
+    render(screen, "Press ENTER to begin again", 22, WIDTH / 2, HEIGHT / 2)
+    render(screen, "Or press ESCAPE to end", 22, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.flip()
     end = True
     while end:
         clock.tick(FPS)
         for key in pygame.event.get():
+            pressed = pygame.key.get_pressed()
             if key.type == pygame.QUIT:
                 pygame.quit()
-            if key.type == pygame.KEYUP:
+            if pressed[pygame.K_RETURN]:
                 end = False
+            if pressed[pygame.K_ESCAPE]:
+                pygame.quit()
 
 
 # Winner Menu after 750 or more scores
@@ -446,16 +457,17 @@ def winner_menu():
     screen.blit(background, background_rect)
     render(screen, "YOU ARE WINNER", 64, WIDTH / 2, HEIGHT / 4)
     render(screen, "THANK YOU FOR PLAYING", 22, WIDTH / 2, HEIGHT / 2)
-    render(screen, "Do you want to start again? Press any key", 30, WIDTH / 2, HEIGHT * 3 / 4)
+    render(screen, "Do you want to start again? Press Enter", 30, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.flip()
     pygame.display.flip()
     winner = True
     while winner:
         clock.tick(FPS)
         for key in pygame.event.get():
+            pressed = pygame.key.get_pressed()
             if key.type == pygame.QUIT:
                 pygame.quit()
-            if key.type == pygame.KEYUP:
+            if pressed[pygame.K_RETURN]:
                 winner = False
 
 
@@ -517,7 +529,7 @@ while Game:
         all_sprites.add(player_ship)
         # Create enemies
         create_object()
-        # After death zero points
+        # After win zero points
         Player_Scores = 0
 
     # Check to close the game
@@ -545,7 +557,7 @@ while Game:
             firs_ait_kit.add(health_boost)
         # Create new ship after destruction
         new_enemy_ship()
-        if Player_Scores >= 750:
+        if Player_Scores >= 500:
             Winner = True
 
     # Hits on the asteroids
@@ -557,7 +569,7 @@ while Game:
         explosion_sound_asteroid.play()
         # Create new asteroid after destruction
         new_asteroid()
-        if Player_Scores >= 750:
+        if Player_Scores >= 500:
             Winner = True
 
     # Asteroid hit on player

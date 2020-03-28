@@ -4,15 +4,15 @@ The space shooter using Python 3 and Library Pygame.
 ![Screen_1](Screenshots/screenshot_1.png)
 
 ## :o: INDEX
-* [Requirements](https://github.com/diable201/Space_Game#requirements)
-* [Screenshots](https://github.com/diable201/Space_Game#screenshots)
-* [Game Features](https://github.com/diable201/Space_Game#game-features)
-* [Controls](https://github.com/diable201/Space_Game#controls)
-* [Installation](https://github.com/diable201/Space_Game#installation)
-* [License](https://github.com/diable201/Space_Game#license)
+* [Requirements](https://github.com/diable201/Space_Game#%EF%B8%8F-requirements)
+* [Screenshots](https://github.com/diable201/Space_Game#camera-screenshots)
+* [Game Features](https://github.com/diable201/Space_Game#-game-features)
+* [Controls](https://github.com/diable201/Space_Game#-controls)
+* [Installation](https://github.com/diable201/Space_Game#-installation)
+* [License](https://github.com/diable201/Space_Game#copyright-license)
 
 ## ❗️ Requirements
-- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 
 	Library Pygame:
 
@@ -29,12 +29,12 @@ The space shooter using Python 3 and Library Pygame.
 	```
 
 ## :camera: Screenshots
-- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 
 ![Screen_2](Screenshots/screenshot_2.png)
 
 ## 🎆 Game Features
-- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 
 ### :rocket: Gameplay :
 * Health bar for the space ship
@@ -55,7 +55,7 @@ The space shooter using Python 3 and Library Pygame.
 	* OST
 
 ## 🤘 Controls
-- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 
 |              | Button              |
 |--------------|---------------------|
@@ -67,7 +67,7 @@ The space shooter using Python 3 and Library Pygame.
 | Quit game    | <kbd>Esc</kbd>      |
 
 ##  🔧 Installation
-- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 ### Build from source
 ```
 Bash shell
@@ -78,7 +78,7 @@ $ python3 main.py
 ```
 
 ## :copyright: License
-- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 
 With :heart: by GitHub and open-source community.
 

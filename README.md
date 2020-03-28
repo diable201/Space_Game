@@ -59,10 +59,10 @@ The space shooter using Python 3 and Library Pygame.
 
 |              | Button              |
 |--------------|---------------------|
-| Move Up   | <kbd>w</kbd>    |
-| Move Down   | <kbd>s</kbd>    |
-| Move Left    | <kbd>a</kbd>     |
-| Move Right   | <kbd>d</kbd>   	|
+| Move Up   | <kbd>W</kbd>    |
+| Move Down   | <kbd>S</kbd>    |
+| Move Left    | <kbd>A</kbd>     |
+| Move Right   | <kbd>D</kbd>   	|
 | Fire (Press or Hold) | <kbd>spacebar</kbd> |
 | Quit game    | <kbd>Esc</kbd>      |
 

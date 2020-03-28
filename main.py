@@ -414,7 +414,6 @@ def draw_health_bar(surface, x, y, health):
         pygame.draw.rect(surface, WHITE, outline_rect, 2)
 
 
-
 # Start menu for a new game
 def start_menu():
     screen.blit(background, background_rect)
@@ -443,12 +442,12 @@ def end_menu():
     while end:
         clock.tick(FPS)
         for key in pygame.event.get():
-            pressed = pygame.key.get_pressed()
+            key_pressed = pygame.key.get_pressed()
             if key.type == pygame.QUIT:
                 pygame.quit()
-            if pressed[pygame.K_RETURN]:
+            if key_pressed[pygame.K_RETURN]:
                 end = False
-            if pressed[pygame.K_ESCAPE]:
+            if key_pressed[pygame.K_ESCAPE]:
                 pygame.quit()
 
 
@@ -464,10 +463,10 @@ def winner_menu():
     while winner:
         clock.tick(FPS)
         for key in pygame.event.get():
-            pressed = pygame.key.get_pressed()
+            key_press = pygame.key.get_pressed()
             if key.type == pygame.QUIT:
                 pygame.quit()
-            if pressed[pygame.K_RETURN]:
+            if key_press[pygame.K_RETURN]:
                 winner = False
 
 

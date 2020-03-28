@@ -1,7 +1,9 @@
-# Space Game
-The space shooter using Python and Library Pygame.
+# ℹ️ Space Game
+The space shooter using Python 3 and Library Pygame.
 
-## INDEX
+![Screen_1](Screenshots/screenshot_1.png)
+
+## :o: INDEX
 * [Requirements](https://github.com/diable201/Space_Game#requirements)
 * [Screenshots](https://github.com/diable201/Space_Game#screenshots)
 * [Game Features](https://github.com/diable201/Space_Game#game-features)
@@ -9,47 +11,51 @@ The space shooter using Python and Library Pygame.
 * [Installation](https://github.com/diable201/Space_Game#installation)
 * [License](https://github.com/diable201/Space_Game#license)
 
-## Requirements
+## ❗️ Requirements
 - :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
 
-Library Pygame
+	Library Pygame:
 
-```
-Bash shell
-$ pip install pygame
-```
-Python3
-```
-Bash shell
-$ which python
-```
+	```
+	Bash shell
+	$ pip install pygame
+	```
+	Python3:
 
-## Screenshots
-[[Back to top]](https://github.com/diable201/Space_Game#index)
+	```
+	Bash shell
+	$ python3 -V
+	Python 3.7.7
+	```
 
-| ![Screen 1](https://imgur.com/a/k0QYUMF) |
-## Game Features
+## :camera: Screenshots
 - :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
-### Gameplay
+
+![Screen_2](Screenshots/screenshot_2.png)
+
+## 🎆 Game Features
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+
+### :rocket: Gameplay :
 * Health bar for the space ship
 * Score board
-*  Power Up (FirstAidKit)
+* Power Up (FirstAidKit)
 * Random sprites for
 	* Explosions
 	* Enemies
 	* Player
 	* Shots
 * 3 Lives per game
-### Sound
+
+### :headphones: Sound :
 * Music and sound for:
 	* Explosions
 	* Shots
 	* Power Up
 	* OST
 
-## Controls
-- :arrow_up:[[Back to top]](https://github.com/diable201/Space_Game#index)
-
+## 🤘 Controls
+- :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
 
 |              | Button              |
 |--------------|---------------------|
@@ -60,7 +66,7 @@ $ which python
 | Fire (Press or Hold) | <kbd>spacebar</kbd> |
 | Quit game    | <kbd>Esc</kbd>      |
 
-## Installation
+##  🔧 Installation
 - :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
 ### Build from source
 ```
@@ -70,7 +76,10 @@ $ cd Downloads/
 $ cd Space_Game-master/
 $ python3 main.py
 ```
-## License
+
+## :copyright: License
 - :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#index)
+
+With :heart: by GitHub and open-source community.
 
 This game is open-sourced software licensed under the  [The Open Software License 3.0 (OSL-3.0)](https://opensource.org/licenses/OSL-3.0)

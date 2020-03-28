@@ -418,7 +418,7 @@ def draw_health_bar(surface, x, y, health):
 def start_menu():
     screen.blit(background, background_rect)
     render(screen, "Welcome to S.Space", 64, WIDTH / 2, HEIGHT / 4)
-    render(screen, "Arrow WADS to move. Hold or press Space to fire", 22, WIDTH / 2, HEIGHT / 2)
+    render(screen, "Arrow WADS to move. Hold or press Space to fire", 25, WIDTH / 2, HEIGHT / 1.5)
     render(screen, "Press any key to begin", 22, WIDTH / 2, HEIGHT * 3 / 4)
     pygame.display.flip()
     menu = True

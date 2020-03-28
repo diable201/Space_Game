@@ -69,6 +69,7 @@ The space shooter using Python 3 and Library Pygame.
 ##  🔧 Installation
 - :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 ### Build from source
+
 ```
 Bash shell
 $ git clone https://github.com/diable201/Space_Game.git

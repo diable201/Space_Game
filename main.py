@@ -188,7 +188,7 @@ class EnemyShip(pygame.sprite.Sprite):
         # Bullet settings
         self.bullet_image = bullet_image
         self.bullets = bullet_list
-        self.shoot_delay = random.randint(1250, 1500)
+        self.shoot_delay = random.randint(1000, 1500)
         self.last_shot = pygame.time.get_ticks()
         self.num_of_shots = 1
 
@@ -556,7 +556,7 @@ while Game:
             firs_ait_kit.add(health_boost)
         # Create new ship after destruction
         new_enemy_ship()
-        if Player_Scores >= 500:
+        if Player_Scores >= 750:
             Winner = True
 
     # Hits on the asteroids
@@ -568,7 +568,7 @@ while Game:
         explosion_sound_asteroid.play()
         # Create new asteroid after destruction
         new_asteroid()
-        if Player_Scores >= 500:
+        if Player_Scores >= 750:
             Winner = True
 
     # Asteroid hit on player

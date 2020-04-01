@@ -177,7 +177,6 @@ class EnemyShip(pygame.sprite.Sprite):
         self.image_original = random.choice(enemy_image)
         self.image = self.image_original.copy()
         self.rect = self.image.get_rect()
-        self.rect = self.image.get_rect()
         self.sprites = sprites_list
 
         # Start position

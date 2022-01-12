@@ -15,15 +15,12 @@ The space shooter using Python 3 and Library Pygame.
 - :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 
 	Library Pygame:
-
-	```
-	Bash shell
+	```console
 	$ pip install pygame
 	```
 	Python3:
 
-	```
-	Bash shell
+	```console
 	$ python3 -V
 	Python 3.7.7
 	```
@@ -70,10 +67,8 @@ The space shooter using Python 3 and Library Pygame.
 - :arrow_up: [[Back to top]](https://github.com/diable201/Space_Game#o-index)
 ### Build from source
 
-```
-Bash shell
+```console
 $ git clone https://github.com/diable201/Space_Game.git
-$ cd Downloads/
 $ cd Space_Game-master/
 $ python3 main.py
 ```
